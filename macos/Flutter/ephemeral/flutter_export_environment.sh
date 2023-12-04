@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\_dev\sdks\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\_dev\gskinner\flutter_wonders_app"
+export "FLUTTER_ROOT=/opt/homebrew/Caskroom/flutter/3.7.12/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/victorflores/Proyectos/Flutter/De 3ros/flutter-wonderous-app"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=2.0.19"

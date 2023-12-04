@@ -10,12 +10,12 @@ part 'widgets/_animated_ribbon.dart';
 part 'widgets/_celebration_particles.dart';
 
 class CollectibleFoundScreen extends StatelessWidget {
+  final CollectibleData collectible;
+
+  final ImageProvider imageProvider;
   // CollectibleItem passes in a (theoretically) pre-loaded imageProvider.
   // we could check for load completion, and hold after introT, but that shouldn't be necessary in a real-world scenario.
-  const CollectibleFoundScreen({required this.collectible, required this.imageProvider, Key? key}) : super(key: key);
-
-  final CollectibleData collectible;
-  final ImageProvider imageProvider;
+  const CollectibleFoundScreen({required this.collectible, required this.imageProvider, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,26 +27,17 @@ class CollectibleFoundScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIntro(BuildContext context) {
-    Duration t = $styles.times.fast;
-    return Stack(children: [
-      Animate().custom(duration: t * 5, builder: (context, ratio, _) => _buildGradient(context, ratio, 0)),
-
-      // icon is handled by Hero initially, then scales slowly:
-      Center(
-        child: FractionallySizedBox(
-          widthFactor: 0.33,
-          heightFactor: 0.33,
-          child: Hero(
-            tag: 'collectible_icon_${collectible.id}',
-            child: Image(
-              image: collectible.icon,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ).animate().scale(begin: 1.5, end: 3, curve: Curves.easeInExpo, delay: t, duration: t * 3).fadeOut(),
-      )
-    ]);
+  Widget _buildCollectionButton(BuildContext context) {
+    Duration t = $styles.times.med;
+    return AppBtn.from(
+      text: $strings.collectibleFoundButtonViewCollection,
+      isSecondary: true,
+      onPressed: () => _handleViewCollectionPressed(context),
+    ).animate().fadeIn(delay: t).move(
+          begin: Offset(0, 50),
+          duration: t,
+          curve: Curves.easeOutCubic,
+        );
   }
 
   Widget _buildDetail(BuildContext context) {
@@ -140,14 +131,39 @@ class CollectibleFoundScreen extends StatelessWidget {
             child: child,
           ),
         )
-        .scale(begin: 0.3, duration: t * 2, curve: Curves.easeOutExpo, alignment: Alignment(0, 0.7));
+        .scale(begin: Offset(0.3, 0.3), duration: t * 2, curve: Curves.easeOutExpo, alignment: Alignment(0, 0.7));
+  }
+
+  Widget _buildIntro(BuildContext context) {
+    Duration t = $styles.times.fast;
+    return Stack(children: [
+      Animate().custom(duration: t * 5, builder: (context, ratio, _) => _buildGradient(context, ratio, 0)),
+
+      // icon is handled by Hero initially, then scales slowly:
+      Center(
+        child: FractionallySizedBox(
+          widthFactor: 0.33,
+          heightFactor: 0.33,
+          child: Hero(
+            tag: 'collectible_icon_${collectible.id}',
+            child: Image(
+              image: collectible.icon,
+              fit: BoxFit.contain,
+            ),
+          ),
+        )
+            .animate()
+            .scale(begin: Offset(1.5, 1.5), end: Offset(3, 3), curve: Curves.easeInExpo, delay: t, duration: t * 3)
+            .fadeOut(),
+      )
+    ]);
   }
 
   Widget _buildRibbon(BuildContext context) {
     Duration t = $styles.times.fast;
     return _AnimatedRibbon($strings.collectibleFoundTitleArtifactDiscovered.toUpperCase())
         .animate()
-        .scale(begin: 0.3, duration: t * 2, curve: Curves.easeOutExpo, alignment: Alignment(0, -1));
+        .scale(begin: Offset(0.3, 0.3), duration: t * 2, curve: Curves.easeOutExpo, alignment: Alignment(0, -1));
   }
 
   Widget _buildTitle(BuildContext context, String text, TextStyle style, Color color, Duration delay) {
@@ -167,19 +183,6 @@ class CollectibleFoundScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildCollectionButton(BuildContext context) {
-    Duration t = $styles.times.med;
-    return AppBtn.from(
-      text: $strings.collectibleFoundButtonViewCollection,
-      isSecondary: true,
-      onPressed: () => _handleViewCollectionPressed(context),
-    ).animate().fadeIn(delay: t).move(
-          begin: Offset(0, 50),
-          duration: t,
-          curve: Curves.easeOutCubic,
-        );
   }
 
   void _handleViewCollectionPressed(BuildContext context) {

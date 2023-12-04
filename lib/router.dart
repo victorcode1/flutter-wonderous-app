@@ -11,23 +11,6 @@ import 'package:wonders/ui/screens/intro/intro_screen.dart';
 import 'package:wonders/ui/screens/timeline/timeline_screen.dart';
 import 'package:wonders/ui/screens/wonder_details/wonders_details_screen.dart';
 
-/// Shared paths / urls used across the app
-class ScreenPaths {
-  static String splash = '/';
-  static String intro = '/welcome';
-  static String home = '/home';
-  static String settings = '/settings';
-  static String wonderDetails(WonderType type, {int tabIndex = 0}) => '/wonder/${type.name}?t=$tabIndex';
-  static String video(String id) => '/video/$id';
-  static String highlights(WonderType type) => '/highlights/${type.name}';
-  static String search(WonderType type) => '/search/${type.name}';
-  static String artifact(String id) => '/artifact/$id';
-  static String collection(String id) => '/collection?id=$id';
-  static String maps(WonderType type) => '/maps/${type.name}';
-  static String timeline(WonderType? type) => '/timeline?type=${type?.name ?? ''}';
-  static String wallpaperPhoto(WonderType type) => '/wallpaperPhoto/${type.name}';
-}
-
 /// Routing table, matches string paths to UI Screens, optionally parses params from the paths
 final appRouter = GoRouter(
   redirect: _handleRedirect,
@@ -41,39 +24,57 @@ final appRouter = GoRouter(
           AppRoute(ScreenPaths.home, (_) => HomeScreen()),
           AppRoute(ScreenPaths.intro, (_) => IntroScreen()),
           AppRoute('/wonder/:type', (s) {
-            int tab = int.tryParse(s.queryParams['t'] ?? '') ?? 0;
+            int tab = int.tryParse(s.pathParameters['t'] ?? '') ?? 0;
             return WonderDetailsScreen(
-              type: _parseWonderType(s.params['type']),
+              type: _parseWonderType(s.pathParameters['type']),
               initialTabIndex: tab,
             );
           }, useFade: true),
           AppRoute('/timeline', (s) {
-            return TimelineScreen(type: _tryParseWonderType(s.queryParams['type']!));
+            return TimelineScreen(type: _tryParseWonderType(s.pathParameters['type']!));
           }),
           AppRoute('/video/:id', (s) {
-            return FullscreenVideoViewer(id: s.params['id']!);
+            return FullscreenVideoViewer(id: s.pathParameters['id']!);
           }),
           AppRoute('/highlights/:type', (s) {
-            return ArtifactCarouselScreen(type: _parseWonderType(s.params['type']));
+            return ArtifactCarouselScreen(type: _parseWonderType(s.pathParameters['type']));
           }),
           AppRoute('/search/:type', (s) {
-            return ArtifactSearchScreen(type: _parseWonderType(s.params['type']));
+            return ArtifactSearchScreen(type: _parseWonderType(s.pathParameters['type']));
           }),
           AppRoute('/artifact/:id', (s) {
-            return ArtifactDetailsScreen(artifactId: s.params['id']!);
+            return ArtifactDetailsScreen(artifactId: s.pathParameters['id']!);
           }),
           AppRoute('/collection', (s) {
-            return CollectionScreen(fromId: s.queryParams['id'] ?? '');
+            return CollectionScreen(fromId: s.pathParameters['id'] ?? '');
           }),
           AppRoute('/maps/:type', (s) {
-            return FullscreenMapsViewer(type: _parseWonderType(s.params['type']));
+            return FullscreenMapsViewer(type: _parseWonderType(s.pathParameters['type']));
           }),
         ]),
   ],
 );
 
+String? _handleRedirect(BuildContext context, GoRouterState state) {
+  // Prevent anyone from navigating away from `/` if app is starting up.
+  if (!appLogic.isBootstrapComplete && state.path != ScreenPaths.splash) {
+    return ScreenPaths.splash;
+  }
+  debugPrint('Navigate to: ${state.path}');
+  return null; // do nothing
+}
+
+WonderType _parseWonderType(String? value) {
+  const fallback = WonderType.chichenItza;
+  if (value == null) return fallback;
+  return _tryParseWonderType(value) ?? fallback;
+}
+
+WonderType? _tryParseWonderType(String value) => WonderType.values.asNameMap()[value];
+
 /// Custom GoRoute sub-class to make the router declaration easier to read
 class AppRoute extends GoRoute {
+  final bool useFade;
   AppRoute(String path, Widget Function(GoRouterState s) builder,
       {List<GoRoute> routes = const [], this.useFade = false})
       : super(
@@ -96,22 +97,21 @@ class AppRoute extends GoRoute {
             return CupertinoPage(child: pageContent);
           },
         );
-  final bool useFade;
 }
 
-String? _handleRedirect(BuildContext context, GoRouterState state) {
-  // Prevent anyone from navigating away from `/` if app is starting up.
-  if (!appLogic.isBootstrapComplete && state.location != ScreenPaths.splash) {
-    return ScreenPaths.splash;
-  }
-  debugPrint('Navigate to: ${state.location}');
-  return null; // do nothing
+/// Shared paths / urls used across the app
+class ScreenPaths {
+  static String splash = '/';
+  static String intro = '/welcome';
+  static String home = '/home';
+  static String settings = '/settings';
+  static String artifact(String id) => '/artifact/$id';
+  static String collection(String id) => '/collection?id=$id';
+  static String highlights(WonderType type) => '/highlights/${type.name}';
+  static String maps(WonderType type) => '/maps/${type.name}';
+  static String search(WonderType type) => '/search/${type.name}';
+  static String timeline(WonderType? type) => '/timeline?type=${type?.name ?? ''}';
+  static String video(String id) => '/video/$id';
+  static String wallpaperPhoto(WonderType type) => '/wallpaperPhoto/${type.name}';
+  static String wonderDetails(WonderType type, {int tabIndex = 0}) => '/wonder/${type.name}?t=$tabIndex';
 }
-
-WonderType _parseWonderType(String? value) {
-  const fallback = WonderType.chichenItza;
-  if (value == null) return fallback;
-  return _tryParseWonderType(value) ?? fallback;
-}
-
-WonderType? _tryParseWonderType(String value) => WonderType.values.asNameMap()[value];

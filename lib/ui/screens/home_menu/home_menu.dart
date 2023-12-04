@@ -10,44 +10,14 @@ import 'package:wonders/ui/common/pop_navigator_underlay.dart';
 import 'package:wonders/ui/screens/home_menu/about_dialog_content.dart';
 
 class HomeMenu extends StatefulWidget {
-  const HomeMenu({Key? key, required this.data}) : super(key: key);
   final WonderData data;
+  const HomeMenu({super.key, required this.data});
 
   @override
   State<HomeMenu> createState() => _HomeMenuState();
 }
 
 class _HomeMenuState extends State<HomeMenu> {
-  double _btnSize(BuildContext context) => (context.sizePx.shortestSide / 5).clamp(60, 100);
-
-  void _handleAboutPressed(BuildContext context) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    if (!mounted) return;
-    showAboutDialog(
-      context: context,
-      applicationName: $strings.appName,
-      applicationVersion: packageInfo.version,
-      applicationLegalese: '© 2022 gskinner',
-      children: [AboutDialogContent()],
-      applicationIcon: Container(
-        color: $styles.colors.black,
-        padding: EdgeInsets.all($styles.insets.xs),
-        child: Image.asset(
-          ImagePaths.appLogoPlain,
-          fit: BoxFit.cover,
-          width: 52,
-          filterQuality: FilterQuality.high,
-        ),
-      ),
-    );
-  }
-
-  void _handleCollectionPressed(BuildContext context) => context.push(ScreenPaths.collection(''));
-
-  void _handleTimelinePressed(BuildContext context) => context.push(ScreenPaths.timeline(widget.data.type));
-
-  void _handleWonderPressed(BuildContext context, WonderData data) => Navigator.pop(context, data.type);
-
   @override
   Widget build(BuildContext context) {
     final double gridWidth = _btnSize(context) * 3 * 1.2;
@@ -74,7 +44,7 @@ class _HomeMenuState extends State<HomeMenu> {
                   _buildIconGrid(context)
                       .animate()
                       .fade(duration: $styles.times.fast)
-                      .scale(begin: .8, curve: Curves.easeOut),
+                      .scale(begin: Offset(.8, .8), curve: Curves.easeOut),
                   Gap($styles.insets.lg),
                   _buildBottomBtns(context),
                   //Spacer(),
@@ -94,37 +64,7 @@ class _HomeMenuState extends State<HomeMenu> {
     );
   }
 
-  Widget _buildIconGrid(BuildContext context) {
-    Widget buildRow(List<Widget> children) => SeparatedRow(
-          mainAxisAlignment: MainAxisAlignment.center,
-          separatorBuilder: () => Gap($styles.insets.sm),
-          children: children,
-        );
-    return SeparatedColumn(
-      separatorBuilder: () => Gap($styles.insets.sm),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        buildRow([
-          _buildGridBtn(context, wondersLogic.all[0]),
-          _buildGridBtn(context, wondersLogic.all[1]),
-          _buildGridBtn(context, wondersLogic.all[2]),
-        ]),
-        buildRow([
-          _buildGridBtn(context, wondersLogic.all[3]),
-          SizedBox(
-            width: _btnSize(context),
-            child: SvgPicture.asset(SvgPaths.compassFull, colorFilter: $styles.colors.offWhite.colorFilter),
-          ),
-          _buildGridBtn(context, wondersLogic.all[4]),
-        ]),
-        buildRow([
-          _buildGridBtn(context, wondersLogic.all[5]),
-          _buildGridBtn(context, wondersLogic.all[6]),
-          _buildGridBtn(context, wondersLogic.all[7]),
-        ]),
-      ],
-    );
-  }
+  double _btnSize(BuildContext context) => (context.sizePx.shortestSide / 5).clamp(60, 100);
 
   Widget _buildBottomBtns(BuildContext context) {
     return ValueListenableBuilder(
@@ -189,13 +129,73 @@ class _HomeMenuState extends State<HomeMenu> {
       ),
     );
   }
+
+  Widget _buildIconGrid(BuildContext context) {
+    Widget buildRow(List<Widget> children) => SeparatedRow(
+          mainAxisAlignment: MainAxisAlignment.center,
+          separatorBuilder: () => Gap($styles.insets.sm),
+          children: children,
+        );
+    return SeparatedColumn(
+      separatorBuilder: () => Gap($styles.insets.sm),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        buildRow([
+          _buildGridBtn(context, wondersLogic.all[0]),
+          _buildGridBtn(context, wondersLogic.all[1]),
+          _buildGridBtn(context, wondersLogic.all[2]),
+        ]),
+        buildRow([
+          _buildGridBtn(context, wondersLogic.all[3]),
+          SizedBox(
+            width: _btnSize(context),
+            child: SvgPicture.asset(SvgPaths.compassFull, colorFilter: $styles.colors.offWhite.colorFilter),
+          ),
+          _buildGridBtn(context, wondersLogic.all[4]),
+        ]),
+        buildRow([
+          _buildGridBtn(context, wondersLogic.all[5]),
+          _buildGridBtn(context, wondersLogic.all[6]),
+          _buildGridBtn(context, wondersLogic.all[7]),
+        ]),
+      ],
+    );
+  }
+
+  void _handleAboutPressed(BuildContext context) async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    showAboutDialog(
+      context: context,
+      applicationName: $strings.appName,
+      applicationVersion: packageInfo.version,
+      applicationLegalese: '© 2022 gskinner',
+      children: [AboutDialogContent()],
+      applicationIcon: Container(
+        color: $styles.colors.black,
+        padding: EdgeInsets.all($styles.insets.xs),
+        child: Image.asset(
+          ImagePaths.appLogoPlain,
+          fit: BoxFit.cover,
+          width: 52,
+          filterQuality: FilterQuality.high,
+        ),
+      ),
+    );
+  }
+
+  void _handleCollectionPressed(BuildContext context) => context.push(ScreenPaths.collection(''));
+
+  void _handleTimelinePressed(BuildContext context) => context.push(ScreenPaths.timeline(widget.data.type));
+
+  void _handleWonderPressed(BuildContext context, WonderData data) => Navigator.pop(context, data.type);
 }
 
 class _MenuTextBtn extends StatelessWidget {
-  const _MenuTextBtn({Key? key, required this.label, required this.onPressed, required this.icon}) : super(key: key);
   final String label;
   final VoidCallback onPressed;
   final AppIcons icon;
+  const _MenuTextBtn({required this.label, required this.onPressed, required this.icon});
 
   @override
   Widget build(BuildContext context) {
